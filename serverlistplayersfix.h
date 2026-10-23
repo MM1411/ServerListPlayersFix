@@ -22,7 +22,7 @@
 
 #include <ISmmPlugin.h>
 #include <igameevents.h>
-#include "khook.hpp"
+#include <sh_vector.h>
 #include "engine2/isource2server.h"
 
 class ServerListPlayersFix : public ISmmPlugin, public IMetamodListener
@@ -42,7 +42,7 @@ public:
 				 bool background );
 	void OnLevelShutdown();
 public: //hooks
-	KHook::Return<void> Hook_GameFrame(IServerGameDLL* pThis, bool simulating, bool bFirstTick, bool bLastTick);
+	void Hook_GameFrame( bool simulating, bool bFirstTick, bool bLastTick );
 public:
 	const char *GetAuthor();
 	const char *GetName();

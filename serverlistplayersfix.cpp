@@ -28,7 +28,7 @@
 
 class GameSessionConfiguration_t { };
 
-KHook::Virtual<IServerGameDLL, void, bool, bool, bool> gameFrameHook(&IServerGameDLL::GameFrame, &g_ServerListPlayersFix, nullptr, &ServerListPlayersFix::Hook_GameFrame);
+SH_DECL_HOOK3_void(IServerGameDLL, GameFrame, SH_NOATTRIB, 0, bool, bool, bool);
 
 #ifdef _WIN32
 #define ROOTBIN "/bin/win64/"
@@ -62,7 +62,7 @@ bool ServerListPlayersFix::Load(PluginId id, ISmmAPI *ismm, char *error, size_t 
 
 	g_SMAPI->AddListener( this, this );
 
-	gameFrameHook.Add(server);
+	SH_ADD_HOOK(IServerGameDLL, GameFrame, server, SH_MEMBER(this, &ServerListPlayersFix::Hook_GameFrame), true);
 
 	g_pCVar = icvar;
 	ConVar_Register( FCVAR_RELEASE | FCVAR_CLIENT_CAN_EXECUTE | FCVAR_GAMEDLL );
@@ -72,7 +72,7 @@ bool ServerListPlayersFix::Load(PluginId id, ISmmAPI *ismm, char *error, size_t 
 
 bool ServerListPlayersFix::Unload(char *error, size_t maxlen)
 {
-	gameFrameHook.Remove(server);
+	SH_REMOVE_HOOK(IServerGameDLL, GameFrame, server, SH_MEMBER(this, &ServerListPlayersFix::Hook_GameFrame), true);
 
 	return true;
 }
@@ -97,7 +97,7 @@ void ServerListPlayersFix::UpdatePlayers()
 	}
 }
 
-KHook::Return<void> ServerListPlayersFix::Hook_GameFrame(IServerGameDLL* pThis, bool simulating, bool bFirstTick, bool bLastTick)
+void ServerListPlayersFix::Hook_GameFrame(bool simulating, bool bFirstTick, bool bLastTick)
 {
 	static double g_flNextUpdate = 0.0;
 
@@ -108,8 +108,6 @@ KHook::Return<void> ServerListPlayersFix::Hook_GameFrame(IServerGameDLL* pThis, 
 		
 		g_flNextUpdate = curtime + 5.0;
 	}
-
-	return {KHook::Action::Ignore};
 }
 
 void ServerListPlayersFix::AllPluginsLoaded()
